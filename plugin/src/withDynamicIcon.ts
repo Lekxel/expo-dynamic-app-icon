@@ -15,19 +15,17 @@ import * as path from "path";
 // @ts-ignore
 import pbxFile from "xcode/lib/pbxFile";
 
-const {
-  getMainApplicationOrThrow,
-  getMainActivityOrThrow,
-} = AndroidConfig.Manifest;
+const { getMainApplicationOrThrow, getMainActivityOrThrow } =
+  AndroidConfig.Manifest;
 
 const androidFolderPath = ["app", "src", "main", "res"];
 
 const androidFolderNames = [
-  "mipmap-mdpi",   // 108 px
-  "mipmap-hdpi",   // 162 px
-  "mipmap-xhdpi",  // 216 px
+  "mipmap-mdpi", // 108 px
+  "mipmap-hdpi", // 162 px
+  "mipmap-xhdpi", // 216 px
   "mipmap-xxhdpi", // 324 px
-  "mipmap-xxxhdpi" // 432 px
+  "mipmap-xxxhdpi", // 432 px
 ];
 
 const androidSize = [108, 162, 216, 324, 432];
@@ -41,10 +39,10 @@ const iosScales = [2, 3, ipad152Scale, ipad167Scale];
 type Platform = "ios" | "android";
 
 type Icon = {
-  image?: string;              // iOS-only (or legacy Android flat)
-  foregroundImage?: string;    // Android adaptive foreground
-  backgroundColor?: string;    // Android adaptive background color
-  backgroundImage?: string;    // Android adaptive background image
+  image?: string; // iOS-only (or legacy Android flat)
+  foregroundImage?: string; // Android adaptive foreground
+  backgroundColor?: string; // Android adaptive background color
+  backgroundImage?: string; // Android adaptive background image
   prerendered?: boolean;
   platforms?: Platform[];
 };
@@ -64,15 +62,15 @@ function arrayToImages(images: string[]) {
 
 const findIconsForPlatform = (icons: IconSet, platform: Platform) => {
   return Object.keys(icons)
-    .filter(key => {
+    .filter((key) => {
       const icon = icons[key];
       if (icon.platforms) {
-        return icon['platforms'].includes(platform);
+        return icon["platforms"].includes(platform);
       }
       return true;
     })
     .reduce((prev, curr) => ({ ...prev, [curr]: icons[curr] }), {});
-}
+};
 
 const withDynamicIcon: ConfigPlugin<string[] | IconSet | void> = (
   config,
@@ -125,14 +123,18 @@ const withIconAndroidManifest: ConfigPlugin<Props> = (config, { icons }) => {
             "android:icon": `@mipmap/ic_launcher_${iconName}`,
             "android:targetActivity": ".MainActivity",
           },
-          "intent-filter": [...mainActivity["intent-filter"] || [
-            {
-              action: [{ $: { "android:name": "android.intent.action.MAIN" } }],
-              category: [
-                { $: { "android:name": "android.intent.category.LAUNCHER" } },
-              ],
-            },
-          ]]
+          "intent-filter": [
+            ...(mainActivity["intent-filter"] || [
+              {
+                action: [
+                  { $: { "android:name": "android.intent.action.MAIN" } },
+                ],
+                category: [
+                  { $: { "android:name": "android.intent.category.LAUNCHER" } },
+                ],
+              },
+            ]),
+          ],
         })),
       ];
     }
@@ -196,7 +198,7 @@ const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
                 name: fileName,
                 src: image,
                 // removeTransparency: true,
-                backgroundColor: "#ffffff",
+                backgroundColor: "#000000",
                 resizeMode: "cover",
                 width: size,
                 height: size,
@@ -225,19 +227,26 @@ const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
         await fs.promises.mkdir(mipmapAnyDpiPath, { recursive: true });
 
         // 2) For each icon
-        for (const [name, { foregroundImage, backgroundColor, backgroundImage }] of Object.entries(icons)) {
-          if (!(foregroundImage && (backgroundColor || backgroundImage))) continue;
+        for (const [
+          name,
+          { foregroundImage, backgroundColor, backgroundImage },
+        ] of Object.entries(icons)) {
+          if (!(foregroundImage && (backgroundColor || backgroundImage)))
+            continue;
 
           // 2a) Write foreground/background PNGs to EACH density
           for (let i = 0; i < androidFolderNames.length; i++) {
-            const dpiFolder = androidFolderNames[i];          // e.g. mipmap-xxhdpi
-            const size = androidSize[i];                      // 108|162|216|324|432
+            const dpiFolder = androidFolderNames[i]; // e.g. mipmap-xxhdpi
+            const size = androidSize[i]; // 108|162|216|324|432
             const dpiPath = path.join(androidResPath, dpiFolder);
             await fs.promises.mkdir(dpiPath, { recursive: true });
 
             // Foreground
             const { source: fgSource } = await generateImageAsync(
-              { projectRoot: config.modRequest.projectRoot, cacheType: "react-native-dynamic-app-icon" },
+              {
+                projectRoot: config.modRequest.projectRoot,
+                cacheType: "react-native-dynamic-app-icon",
+              },
               {
                 name: `ic_launcher_${name}_foreground.png`,
                 src: foregroundImage,
@@ -249,12 +258,18 @@ const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
                 backgroundColor: "transparent",
               }
             );
-            await fs.promises.writeFile(path.join(dpiPath, `ic_launcher_${name}_foreground.png`), fgSource as any);
+            await fs.promises.writeFile(
+              path.join(dpiPath, `ic_launcher_${name}_foreground.png`),
+              fgSource as any
+            );
 
             // Background image (if provided)
             if (backgroundImage) {
               const { source: bgSource } = await generateImageAsync(
-                { projectRoot: config.modRequest.projectRoot, cacheType: "react-native-dynamic-app-icon" },
+                {
+                  projectRoot: config.modRequest.projectRoot,
+                  cacheType: "react-native-dynamic-app-icon",
+                },
                 {
                   name: `ic_launcher_${name}_background.png`,
                   src: backgroundImage,
@@ -265,14 +280,21 @@ const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
                   backgroundColor: "transparent",
                 }
               );
-              await fs.promises.writeFile(path.join(dpiPath, `ic_launcher_${name}_background.png`), bgSource as any);
+              await fs.promises.writeFile(
+                path.join(dpiPath, `ic_launcher_${name}_background.png`),
+                bgSource as any
+              );
             }
           }
 
           // 2b) If background is a color, ensure values/colors.xml has it
           let backgroundRef = "";
           if (backgroundColor) {
-            const colorsPath = path.join(androidResPath, "values", "colors.xml");
+            const colorsPath = path.join(
+              androidResPath,
+              "values",
+              "colors.xml"
+            );
             let colorsXml = fs.existsSync(colorsPath)
               ? await fs.promises.readFile(colorsPath, "utf8")
               : "<resources>\n</resources>";
@@ -291,7 +313,10 @@ const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
           }
 
           // 2c) Write the adaptive icon XML (only once) in anydpi-v26
-          const xmlPath = path.join(mipmapAnyDpiPath, `ic_launcher_${name}.xml`);
+          const xmlPath = path.join(
+            mipmapAnyDpiPath,
+            `ic_launcher_${name}.xml`
+          );
           const xml = `
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
   <background android:drawable="${backgroundRef}"/>
@@ -313,7 +338,6 @@ const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
 
 // for ios
 function getIconName(name: string, size: number, scale?: number) {
-
   const fileName = `${name}-Icon-$${size}x${size}`;
 
   if (scale != null) {
@@ -492,7 +516,7 @@ async function createIconsAsync(
           name: iconFileName,
           src: icon.image,
           removeTransparency: true,
-          backgroundColor: "#ffffff",
+          backgroundColor: "#000000",
           resizeMode: "cover",
           width: scaledSize,
           height: scaledSize,

@@ -5,10 +5,19 @@ public class ExpoDynamicAppIconModule: Module {
     
     Name("ExpoDynamicAppIcon")
 
-    Function("setAppIcon") { (name: String, defaultIcon: String) -> String in
-        self.setAppIconWithoutAlert(name)
-        return name
+   Function("setAppIcon") { (name: String?) -> String in
+   let iconName: String? = {
+    guard let name = name, !name.isEmpty else {
+      return nil   // ← THIS enables reset to default
     }
+    return name
+  }()
+  
+  self.setAppIconWithoutAlert(iconName)
+  return iconName ?? "DEFAULT"
+  
+  }
+
 
     Function("getAppIcon") { () -> String in
       return UIApplication.shared.alternateIconName ?? "DEFAULT"
