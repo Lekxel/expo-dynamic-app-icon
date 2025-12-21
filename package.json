@@ -12,7 +12,8 @@
   "scripts": {
     "build": "tsc --build",
     "build:plugin": "tsc --project tsconfig.plugin.json",
-    "prepublishOnly": "npm run build && npm run build:plugin"
+    "prepublishOnly": "npm run build && npm run build:plugin",
+    "postinstall": "npm run prepublishOnly"
   },
   "keywords": [
     "react-native",

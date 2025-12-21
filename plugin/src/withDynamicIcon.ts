@@ -39,7 +39,7 @@ const iosScales = [2, 3, ipad152Scale, ipad167Scale];
 type Platform = "ios" | "android";
 
 type Icon = {
-  image?: string; // iOS-only (or legacy Android flat)
+  image: string; // iOS-only (or legacy Android flat)
   foregroundImage?: string; // Android adaptive foreground
   backgroundColor?: string; // Android adaptive background color
   backgroundImage?: string; // Android adaptive background image
@@ -187,7 +187,8 @@ const withIconAndroidImages: ConfigPlugin<Props> = (config, { icons }) => {
           const outputPath = path.join(androidResPath, androidFolderNames[i]);
 
           for (const [name, { image }] of Object.entries(icons)) {
-            const fileName = `${name}.png`;
+            console.log(`Generating icon for ${name}`, image);
+            const fileName = `ic_launcher_${name}.png`;
 
             const { source } = await generateImageAsync(
               {
