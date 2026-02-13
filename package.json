@@ -10,8 +10,8 @@
     ]
   },
   "scripts": {
-    "build": "npx tsc --build",
-    "build:plugin": "npx tsc --project tsconfig.plugin.json",
+    "build": "tsc --build",
+    "build:plugin": "tsc --project tsconfig.plugin.json",
     "prepublishOnly": "npm run build && npm run build:plugin",
     "postinstall": "npm run prepublishOnly"
   },
@@ -37,6 +37,7 @@
   "dependencies": {
     "@expo/config-plugins": "^9.0.0",
     "@expo/image-utils": "^0.4.0",
+    "typescript": "^5.3.3",
     "xcode": "^3.0.1"
   },
   "devDependencies": {
