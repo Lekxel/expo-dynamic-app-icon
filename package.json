@@ -10,8 +10,8 @@
     ]
   },
   "scripts": {
-    "build": "tsc --build",
-    "build:plugin": "tsc --project tsconfig.plugin.json",
+    "build": "npx tsc --build",
+    "build:plugin": "npx tsc --project tsconfig.plugin.json",
     "prepublishOnly": "npm run build && npm run build:plugin",
     "postinstall": "npm run prepublishOnly"
   },
